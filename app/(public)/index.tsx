@@ -1,8 +1,10 @@
 /* eslint-disable react/no-unescaped-entities */
  
 import { Colors } from "@/constants/Colors";
+import { api } from "@/convex/_generated/api";
 import { useOAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "convex/react";
 import {
   Image,
   ScrollView,
@@ -13,8 +15,10 @@ import {
 } from "react-native";
 
 export default function Index() {
-   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_facebook' });
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_facebook' });
   const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
+  const data = useQuery(api.users.getAllUsers)
+  console.log(data)
 
   const handleFacebookLogin = async () => {
     try {
