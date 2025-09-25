@@ -1,25 +1,37 @@
 import { HttpRouter } from "convex/server";
+import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 
 const http = new HttpRouter();
 
-export const doSomething = httpAction(async (ctx, request) => {
-    const { data, type } = await request.json();
-    console.log("Received webhook:", { data, type });
+const handleClerkWebhook = httpAction(async (ctx, request) => {
+  const { data, type } = await request.json();
 
-    switch (type) {
-        case "user.created":
-            console.log("User created:", data);
-            break;
-    }
+  switch (type) {
+    case 'user.created':
+      await ctx.runMutation(internal.users.createUser, {
+        clerkId: data.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email_addresses[0].email_address,
+        imageUrl: data.image_url,
+        username: data.username,
+        followersCount: 0,
+      });
 
-    return new Response(null, { status: 200 });
+      break;
+    case 'user.deleted':
+      break;
+    default:
+      break;
+  }
+  return new Response(null, { status: 200 });
 });
 
 http.route({
-    path: "/clerk-users-webhook",
-    method: "GET",
-    handler: doSomething,
+    path: "/clerk-users-webhook",   
+    method: "POST",
+    handler: handleClerkWebhook,
 })
 
 //https://neat-rhinoceros-328.convex.site/clerk-users-webhook
