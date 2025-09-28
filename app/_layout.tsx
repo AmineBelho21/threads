@@ -3,7 +3,7 @@ import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { Slot } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
@@ -26,11 +26,28 @@ const InitialLayout = () => {
     DMSans_700Bold
   });
 
+  const { isLoaded, isSignedIn } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+    if (!isSignedIn && !inAuthGroup) {
+      router.replace("/(auth)/(tabs)/feed");
+    }
+    else if(!isSignedIn && inAuthGroup) {
+      router.replace("/(public)");
+    }
+  }, [isSignedIn]);
+
   return (
     <Slot />
   );
