@@ -39,12 +39,12 @@ const InitialLayout = () => {
   useEffect(() => {
     if (!isLoaded) return;
 
-    const inAuthGroup = segments[0] === "(auth)";
-    if (!isSignedIn && !inAuthGroup) {
-      router.replace("/(auth)/(tabs)/feed");
-    }
-    else if(!isSignedIn && inAuthGroup) {
-      router.replace("/(public)");
+    const inTabsGroup = segments[0] === '(auth)';
+
+    if (isSignedIn && !inTabsGroup) {
+      router.replace('/(auth)/(tabs)/feed');
+    } else if (!isSignedIn && inTabsGroup) {
+      router.replace('/(public)');
     }
   }, [isSignedIn]);
 
