@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 const Page = () => {
     return (
         <View>
-            <Text>This is feed</Text>
+            <Text>Create Thread</Text>
 
         </View>
     )
