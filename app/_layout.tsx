@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { tokenCache } from "@/utlis/cache";
 import { ClerkLoaded, ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
@@ -60,7 +61,7 @@ const InitialLayout = () => {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !fontsLoaded) return;
 
     const inTabsGroup = segments[0] === '(auth)';
 
@@ -69,24 +70,22 @@ const InitialLayout = () => {
     } else if (!isSignedIn && inTabsGroup) {
       router.replace('/(public)');
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, isLoaded, fontsLoaded]); 
 
   useEffect(() => {
     if (user && user.user) {
-      Sentry.setUser({ 
-        email: user.user.emailAddresses[0].emailAddress, 
-        id: user.user.id 
-    });
+      Sentry.setUser({ email: user.user.emailAddresses[0].emailAddress, id: user.user.id });
     } else {
       Sentry.setUser(null);
     }
   }, [user]);
 
-  return (
-    <Slot />
-  );
-}
+  if (!fontsLoaded || !isLoaded) {
+    return null;
+  }
 
+  return <Slot />;
+};
 // Fixed Sentry.wrap syntax
 export default Sentry.wrap(function RootLayout() {
   return (

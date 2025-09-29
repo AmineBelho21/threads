@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 const CreateTabIcon = ({
   color,
@@ -17,7 +18,7 @@ const CreateTabIcon = ({
 );
 
 const Layout = () => {
-    const {signOut} = useAuth();
+    const {signOut, isLoaded} = useAuth();
     const router = useRouter();
 
   return (
@@ -88,6 +89,7 @@ const Layout = () => {
       <Tabs.Screen
         name="profile"
         options={{
+          headerShown: false,
           title: "Profile",
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
@@ -95,11 +97,6 @@ const Layout = () => {
               size={size}
               color={color}
             />),
-            headerRight: () => (
-                <TouchableOpacity onPress={() => signOut()}>
-                  <Ionicons name="log-out-outline" size={24} color="black" />
-                </TouchableOpacity>
-          ),
         }}
       />
     </Tabs>

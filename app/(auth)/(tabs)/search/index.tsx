@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { StyleSheet, Text, View } from 'react-native';
 
 const Page = () => {
