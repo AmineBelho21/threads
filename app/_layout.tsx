@@ -1,31 +1,12 @@
 import { tokenCache } from "@/utlis/cache";
-import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import { ClerkLoaded, ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
+import * as Sentry from "@sentry/react-native";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import * as Sentry from '@sentry/react-native';
-
-Sentry.init({
-  dsn: 'https://7cfc51944203a25cd6a9200fec787920@o4510098045599744.ingest.de.sentry.io/4510098056478800',
-
-  // Adds more context data to events (IP address, cookies, user, etc.)
-  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
-  sendDefaultPii: true,
-
-  // Enable Logs
-  enableLogs: true,
-
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
-
-  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // spotlight: __DEV__,
-});
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!clerkPublishableKey) {
@@ -33,15 +14,36 @@ if (!clerkPublishableKey) {
 }
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
- unsavedChangesWarning: false,
-} );
+  unsavedChangesWarning: false,
+});
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  attachScreenshot: true,
+  debug: true, // Keep true to see console logs
+  tracesSampleRate: 1.0,
+  _experiments: {
+    profileSampleRate: 1.0,
+    replaysSessionSampleRate: 1.0,
+    replaysOnErrorSampleRate: 1.0,
+  },
+  integrations: [
+    Sentry.reactNavigationIntegration(), // Add this!
+    Sentry.mobileReplayIntegration({
+      maskAllText: false, // Set to false to see actual content in replays
+      maskAllImages: false,
+    }),
+  ],
+  // Important: Enable replays
+  enableCaptureFailedRequests: true,
+});
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
   const [fontsLoaded] = useFonts({
-    DMSans_400Regular, 
+    DMSans_400Regular,
     DMSans_500Medium,
     DMSans_700Bold
   });
@@ -49,6 +51,7 @@ const InitialLayout = () => {
   const { isLoaded, isSignedIn } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const user = useUser();
 
   useEffect(() => {
     if (fontsLoaded) {
@@ -68,16 +71,27 @@ const InitialLayout = () => {
     }
   }, [isSignedIn]);
 
+  useEffect(() => {
+    if (user && user.user) {
+      Sentry.setUser({ 
+        email: user.user.emailAddresses[0].emailAddress, 
+        id: user.user.id 
+    });
+    } else {
+      Sentry.setUser(null);
+    }
+  }, [user]);
+
   return (
     <Slot />
   );
 }
 
-
+// Fixed Sentry.wrap syntax
 export default Sentry.wrap(function RootLayout() {
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey!} 
-      tokenCache={tokenCache} 
+    <ClerkProvider publishableKey={clerkPublishableKey!}
+      tokenCache={tokenCache}
     >
       <ClerkLoaded>
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
