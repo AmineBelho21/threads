@@ -21,7 +21,7 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   attachScreenshot: true,
-  debug: true, // Keep true to see console logs
+  debug: true,
   tracesSampleRate: 1.0,
   _experiments: {
     profileSampleRate: 1.0,
@@ -29,13 +29,12 @@ Sentry.init({
     replaysOnErrorSampleRate: 1.0,
   },
   integrations: [
-    Sentry.reactNavigationIntegration(), // Add this!
+    Sentry.reactNavigationIntegration(),
     Sentry.mobileReplayIntegration({
-      maskAllText: false, // Set to false to see actual content in replays
+      maskAllText: false,
       maskAllImages: false,
     }),
   ],
-  // Important: Enable replays
   enableCaptureFailedRequests: true,
 });
 
@@ -86,7 +85,7 @@ const InitialLayout = () => {
 
   return <Slot />;
 };
-// Fixed Sentry.wrap syntax
+
 export default Sentry.wrap(function RootLayout() {
   return (
     <ClerkProvider publishableKey={clerkPublishableKey!}
