@@ -38,10 +38,20 @@ const UserProfile = ({ userId }: UserProfileProps) => {
         {isSelf && (
             <>
             <TouchableOpacity style={styles.button}>
-              <Text>Edit Profile</Text>
+              <Text style={styles.buttonText}>Edit Profile</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
-                <Text>Share Profile</Text>
+                <Text style={styles.buttonText}>Share Profile</Text>
+            </TouchableOpacity>
+            </>
+        )}
+        {!isSelf && (
+            <>
+            <TouchableOpacity style={styles.fullButton}>
+              <Text style={styles.fullButtonText}>Follow</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.fullButton}>
+                <Text style={styles.fullButtonText}>Mention</Text>
             </TouchableOpacity>
             </>
         )}
@@ -95,5 +105,21 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+    buttonText: {   
+        fontWeight: 'bold'
+    },
+fullButton: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullButtonText: {
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
