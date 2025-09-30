@@ -2,7 +2,7 @@
 import { Colors } from '@/constants/Colors';
 import { Id } from '@/convex/_generated/dataModel';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useAuth } from '@clerk/clerk-expo'; // ✅ Changed from clerk-react to clerk-expo
+import { useAuth } from '@clerk/clerk-expo';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";

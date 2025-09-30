@@ -1,15 +1,99 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Colors } from "@/constants/Colors";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useQuery } from "convex/react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type UserProfileProps = {
-    userId?: string;
-}
+  userId?: string;
+};
 
 const UserProfile = ({ userId }: UserProfileProps) => {
-    return (
-        <View>
-            <Text>User Profile</Text>
+  const profile = useQuery(api.users.getUserById, {userId: userId as Id<"users">,});
+
+  const { userProfile } = useUserProfile();
+  const isSelf = userProfile?._id === userId;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.profileContainer}>
+        <View style={styles.profileTextContainer}>
+          <Text style={styles.name}>
+            {profile?.first_name} {profile?.last_name}
+          </Text>
+          <Text style={styles.email}>{profile?.email}</Text>
         </View>
-    )
-}
+        <Image
+          source={{ uri: profile?.imageUrl as string }}
+          style={styles.image}
+        />
+      </View>
+      <Text style={styles.bio}>{profile?.bio ? profile?.bio : 'No bio yet'}</Text>
+      <Text>
+        {profile?.followersCount} followers · {profile?.websiteUrl}
+      </Text>
+
+      <View style={styles.buttonRow}>
+        {isSelf && (
+            <>
+            <TouchableOpacity style={styles.button}>
+              <Text>Edit Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+                <Text>Share Profile</Text>
+            </TouchableOpacity>
+            </>
+        )}
+      </View>
+    </View>
+  );
+};
 export default UserProfile;
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  profileContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  profileTextContainer: {
+    gap: 6,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  image: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  email: {
+    fontSize: 14,
+    color: "gray",
+  },
+  bio: {
+    fontSize: 14,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 16,
+    gap: 16,
+  },
+  button: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
