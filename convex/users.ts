@@ -1,23 +1,23 @@
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, QueryCtx } from "./_generated/server";
-
-export const getAllUsers = query({
-    args: {},
-    handler: async (ctx) => {
-        console.log("Fetching all users");
-        return await ctx.db.query("users").collect();
-    }
-})
 
 export const getUserByClerkId = query({
   args: {
     clerkId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const user = await ctx.db
     .query("users")
     .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
     .unique();
+
+    if(!user?.imageUrl || user.imageUrl.startsWith('http')) {
+      return user;
+    }
+
+    const url = await ctx.storage.getUrl(user.imageUrl as Id<'_storage'>);
+    return { ...user, imageUrl: url };
   }
 })
 
@@ -26,9 +26,18 @@ export const getUserById = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.userId);
+    const user = await ctx.db.get(args.userId);
+    if (!user?.imageUrl || user.imageUrl.startsWith('http')) {
+      return user;
+    }
+
+    const url = await ctx.storage.getUrl(user.imageUrl as Id<'_storage'>);
+    return { ...user, imageUrl: url };
   }
-})  
+})
+
+
+
 
 export const createUser = internalMutation({
   args: {
@@ -57,7 +66,7 @@ export const updateUser = mutation({
     _id: v.id("users"),
     bio: v.optional(v.string()),
     websiteUrl: v.optional(v.string()),
-    profilePicture: v.optional(v.string()),
+    imageUrl: v.optional(v.id('_storage')),
     pushToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -65,6 +74,22 @@ export const updateUser = mutation({
   },
 });
 
+
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    await getCurrentUserOrThrow(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const getImageUrl = query({
+  args: {
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});
 
 // identity check 
 export const current = query({
