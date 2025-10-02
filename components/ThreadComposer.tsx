@@ -10,6 +10,9 @@ import { useState } from "react";
 import {
   Alert,
   Image,
+  InputAccessoryView,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -36,15 +39,16 @@ const ThreadComposer = ({
     []
   );
   const addThread = useMutation(api.messages.addThreadMessage);
+  const inputAccessoryViewID = "uniqueID";
 
   const generateUploadUrl = useMutation(api.messages.generateUploadUrl);
 
   const handleSubmit = async () => {
-    const mediaIds = await Promise.all(mediaFiles.map(uploadMediaFile))
+    const mediaIds = await Promise.all(mediaFiles.map(uploadMediaFile));
     addThread({
       threadId,
       content: threadContent,
-      mediaFiles: mediaIds
+      mediaFiles: mediaIds,
     });
     setThreadContent("");
     setMediaFiles([]);
@@ -128,114 +132,129 @@ const ThreadComposer = ({
         }
       }
     >
-      <View>
-        <Stack.Screen
-          options={{
-            headerLeft: () => (
-              <TouchableOpacity onPress={handleCancel}>
-                <Text>Cancel</Text>
-              </TouchableOpacity>
-            ),
-          }}
-        />
-        <View style={styles.topRow}>
-          {userProfile && (
-            <Image
-              source={{ uri: userProfile?.imageUrl as string }}
-              style={styles.avatar}
-            />
-          )}
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity onPress={handleCancel}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <View style={styles.topRow}>
+        {userProfile && (
+          <Image
+            source={{ uri: userProfile?.imageUrl as string }}
+            style={styles.avatar}
+          />
+        )}
 
-          <View style={styles.centerContainer}>
-            <Text style={styles.name}>
-              {userProfile?.first_name} {userProfile?.last_name}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={isReply ? "Reply to thread" : "What's new?"}
-              value={threadContent}
-              onChangeText={setThreadContent}
-              multiline
-              autoFocus={!isPreview}
-            />
-            {mediaFiles.length > 0 && (
-              <ScrollView horizontal>
-                {mediaFiles.map((file, index) => (
-                  <View style={styles.mediaContainer} key={index}>
-                    <Image
-                      source={{ uri: file.uri }}
-                      style={styles.mediaImage}
-                    />
-                    <TouchableOpacity
-                      style={styles.deleteIconContainer}
-                      onPress={() => {
-                        setMediaFiles(mediaFiles.filter((_, i) => i !== index));
-                      }}
-                    >
-                      <Ionicons name="close" size={16} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-            <View style={styles.iconRow}>
+        <View style={styles.centerContainer}>
+          <Text style={styles.name}>
+            {userProfile?.first_name} {userProfile?.last_name}
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder={isReply ? "Reply to thread" : "What's new?"}
+            value={threadContent}
+            onChangeText={setThreadContent}
+            multiline
+            autoFocus={!isPreview}
+            inputAccessoryViewID={
+              Platform.OS === "ios" ? inputAccessoryViewID : undefined
+            }
+          />
+
+          {mediaFiles.length > 0 && (
+            <ScrollView horizontal>
+              {mediaFiles.map((file, index) => (
+                <View style={styles.mediaContainer} key={index}>
+                  <Image source={{ uri: file.uri }} style={styles.mediaImage} />
+                  <TouchableOpacity
+                    style={styles.deleteIconContainer}
+                    onPress={() => {
+                      setMediaFiles(mediaFiles.filter((_, i) => i !== index));
+                    }}
+                  >
+                    <Ionicons name="close" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          <View style={styles.iconRow}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => selectImage("library")}
+            >
+              <Ionicons name="images-outline" size={24} color={Colors.border} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => selectImage("camera")}
+            >
+              <Ionicons name="camera-outline" size={24} color={Colors.border} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <MaterialIcons name="gif" size={24} color={Colors.border} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons name="mic-outline" size={24} color={Colors.border} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <FontAwesome6 name="hashtag" size={24} color={Colors.border} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons
+                name="stats-chart-outline"
+                size={24}
+                color={Colors.border}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[styles.cancelButton, { opacity: isPreview ? 0 : 1 }]}
+          onPress={removeThread}
+        >
+          <Ionicons name="send" size={24} color={Colors.border} />
+        </TouchableOpacity>
+      </View>
+
+      {!isPreview &&
+        (Platform.OS === "ios" ? (
+          <InputAccessoryView nativeID={inputAccessoryViewID}>
+            <View style={styles.keyboardAccessory}>
+              <Text style={styles.keyboardAccessoryText}>
+                {isReply
+                  ? "Everyone can reply and quote"
+                  : "Profiles that you follow can reply and quote"}
+              </Text>
               <TouchableOpacity
-                style={styles.iconButton}
-                onPress={() => selectImage("library")}
+                style={styles.submitButton}
+                onPress={handleSubmit}
               >
-                <Ionicons
-                  name="images-outline"
-                  size={24}
-                  color={Colors.border}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={() => selectImage("camera")}
-              >
-                <Ionicons
-                  name="camera-outline"
-                  size={24}
-                  color={Colors.border}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <MaterialIcons name="gif" size={24} color={Colors.border} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <Ionicons name="mic-outline" size={24} color={Colors.border} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <FontAwesome6 name="hashtag" size={24} color={Colors.border} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <Ionicons
-                  name="stats-chart-outline"
-                  size={24}
-                  color={Colors.border}
-                />
+                <Text style={styles.submitButtonText}>Post</Text>
               </TouchableOpacity>
             </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.cancelButton, { opacity: isPreview ? 0 : 1 }]}
-            onPress={removeThread}
-          >
-            <Ionicons name="send" size={24} color={Colors.border} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={[styles.keyboardAccessory]}>
-          <Text style={styles.keyboardAccessoryText}>
-            {isReply
-              ? "Everyone can reply and quote"
-              : "Profiles that you follow can reply and quote"}
-          </Text>
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Post</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          </InputAccessoryView>
+        ) : (
+          <KeyboardAvoidingView behavior="padding">
+            <View style={styles.keyboardAccessory}>
+              <Text style={styles.keyboardAccessoryText}>
+                {isReply
+                  ? "Everyone can reply and quote"
+                  : "Profiles that you follow can reply and quote"}
+              </Text>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.submitButtonText}>Post</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        ))}
     </TouchableOpacity>
   );
 };
