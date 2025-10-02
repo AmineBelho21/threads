@@ -4,16 +4,18 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type ThreadComposerProps = {
@@ -30,22 +32,23 @@ const ThreadComposer = ({
   const router = useRouter();
   const [threadContent, setThreadContent] = useState("");
   const { userProfile } = useUserProfile();
-  const [mediaFiles, setMediaFiles] = useState<string[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<ImagePicker.ImagePickerAsset[]>(
+    []
+  );
   const addThread = useMutation(api.messages.addThreadMessage);
 
+  const generateUploadUrl = useMutation(api.messages.generateUploadUrl);
+
   const handleSubmit = async () => {
+    const mediaIds = await Promise.all(mediaFiles.map(uploadMediaFile))
     addThread({
       threadId,
       content: threadContent,
+      mediaFiles: mediaIds
     });
     setThreadContent("");
     setMediaFiles([]);
     router.back();
-  };
-
-  const removeThread = () => {
-    setThreadContent("");
-    setMediaFiles([]);
   };
 
   const handleCancel = async () => {
@@ -67,8 +70,46 @@ const ThreadComposer = ({
     ]);
   };
 
-  const selectImage = async () => {
-    console.log("select image");
+  const removeThread = () => {
+    setThreadContent("");
+    setMediaFiles([]);
+  };
+
+  const selectImage = async (source: "camera" | "library") => {
+    const options: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    };
+
+    let result;
+
+    if (source === "camera") {
+      result = await ImagePicker.launchCameraAsync(options);
+    } else {
+      result = await ImagePicker.launchImageLibraryAsync(options);
+    }
+
+    if (!result.canceled) {
+      setMediaFiles([result.assets[0], ...mediaFiles]);
+    }
+  };
+
+  const uploadMediaFile = async (image: ImagePicker.ImagePickerAsset) => {
+    const uploadUrl = await generateUploadUrl();
+
+    const response = await fetch(image.uri);
+    const blob = await response.blob();
+
+    const result = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": image.mimeType || "image/jpeg" },
+      body: blob,
+    });
+
+    const { storageId } = await result.json();
+    return storageId;
   };
 
   return (
@@ -117,10 +158,30 @@ const ThreadComposer = ({
               multiline
               autoFocus={!isPreview}
             />
+            {mediaFiles.length > 0 && (
+              <ScrollView horizontal>
+                {mediaFiles.map((file, index) => (
+                  <View style={styles.mediaContainer} key={index}>
+                    <Image
+                      source={{ uri: file.uri }}
+                      style={styles.mediaImage}
+                    />
+                    <TouchableOpacity
+                      style={styles.deleteIconContainer}
+                      onPress={() => {
+                        setMediaFiles(mediaFiles.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <Ionicons name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
             <View style={styles.iconRow}>
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => selectImage()}
+                onPress={() => selectImage("library")}
               >
                 <Ionicons
                   name="images-outline"
@@ -130,7 +191,7 @@ const ThreadComposer = ({
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => selectImage()}
+                onPress={() => selectImage("camera")}
               >
                 <Ionicons
                   name="camera-outline"
@@ -238,5 +299,25 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  mediaContainer: {
+    position: "relative",
+    marginRight: 10,
+    marginTop: 10,
+  },
+  deleteIconContainer: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 12,
+    padding: 4,
+  },
+  mediaImage: {
+    width: 100,
+    height: 200,
+    borderRadius: 6,
+    marginRight: 10,
+    marginTop: 10,
   },
 });
