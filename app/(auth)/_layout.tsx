@@ -18,6 +18,7 @@ const Layout = () => {
         options={{
           presentation: "modal",
           title: "New Thread",
+          headerTitleAlign: "center",
           headerRight: () => (
             <TouchableOpacity>
               <Ionicons name="ellipsis-horizontal-circle" size={24} />
