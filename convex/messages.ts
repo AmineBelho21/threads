@@ -48,10 +48,12 @@ export const getThreads = query({
     const messagesWithCreator = await Promise.all(
       threads.page.map(async (thread) => {
         const creator = await getMessageCreator(ctx, thread.userId);
+        const mediaUrls = await getMediaUrls(ctx, thread.mediaFiles)
 
         return {
           ...thread, 
-          creator
+          creator,
+          mediaFiles: mediaUrls
         }
       })
     )
@@ -62,6 +64,21 @@ export const getThreads = query({
     }
   },
 })
+
+export const likeThread = mutation({
+  args: {
+    messageId: v.id('messages'),
+  },
+  handler: async (ctx, args) => {
+    await getCurrentUserOrThrow(ctx);
+
+    const message = await ctx.db.get(args.messageId);
+
+    await ctx.db.patch(args.messageId, {
+      likeCount: (message?.likeCount || 0) + 1,
+    });
+  },
+});
 
 const getMessageCreator = async(ctx: QueryCtx, userId: Id<'users'>) => {
   const user = await ctx.db.get(userId)
@@ -78,12 +95,25 @@ const getMessageCreator = async(ctx: QueryCtx, userId: Id<'users'>) => {
   }
 }
 
+const getMediaUrls = async (ctx: QueryCtx, mediaFiles: string[] | undefined) => {
+  if (!mediaFiles || mediaFiles.length === 0) {
+    return [];
+  }
+
+  const urlPromises = mediaFiles.map((file) => ctx.storage.getUrl(file as Id<'_storage'>));
+  const results = await Promise.allSettled(urlPromises);
+  return results
+    .filter((result): result is PromiseFulfilledResult<string> => result.status === 'fulfilled')
+    .map((result) => result.value);
+};
+
 export const generateUploadUrl = mutation({
   handler: async (ctx) => {
     await getCurrentUserOrThrow(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
+
 
 
 

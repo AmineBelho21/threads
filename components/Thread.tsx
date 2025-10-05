@@ -1,8 +1,10 @@
 import { Colors } from '@/constants/Colors';
+import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type ThreadProps = {
   thread: Doc<'messages'> & { creator: Doc<'users'> };
@@ -10,7 +12,7 @@ type ThreadProps = {
 
 const Thread = ({ thread }: ThreadProps) => {
   const { content, mediaFiles, likeCount, commentCount, retweetCount, creator } = thread;
-//   const likeThread = useMutation(api.messages.likeThread);
+  const likeThread = useMutation(api.messages.likeThread);
 
   return (
     <View style={styles.container}>
@@ -35,27 +37,20 @@ const Thread = ({ thread }: ThreadProps) => {
           />
         </View>
         <Text style={styles.content}>{content}</Text>
-        {/* {mediaFiles && mediaFiles.length > 0 && (
+        {mediaFiles && mediaFiles.length > 0 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.mediaContainer}>
             {mediaFiles.map((imageUrl, index) => (
-              <Link
-                href={`/(auth)/(modal)/image/${encodeURIComponent(imageUrl)}?threadId=${thread._id}&likeCount=${likeCount}&commentCount=${commentCount}&retweetCount=${retweetCount}`}
-                key={index}
-                asChild>
-                <TouchableOpacity>
-                  <Image source={{ uri: imageUrl }} style={styles.mediaImage} />
-                </TouchableOpacity>
-              </Link>
+                  <Image key={index} source={{ uri: imageUrl }} style={styles.mediaImage} />
             ))}
           </ScrollView>
-        )} */}
+        )}
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.actionButton}
-            // onPress={() => likeThread({ messageId: thread._id })}
+            onPress={() => likeThread({ messageId: thread._id })}
             >
             <Ionicons name="heart-outline" size={24} color="black" />
             <Text style={styles.actionText}>{likeCount}</Text>

@@ -1,20 +1,23 @@
 /* eslint-disable react/no-unescaped-entities */
 
 import { Colors } from "@/constants/Colors";
-import { Id } from "@/convex/_generated/dataModel";
+import { api } from "@/convex/_generated/api";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { usePaginatedQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Tabs from "./Tabs";
+import Thread from "./Thread";
 import UserProfile from "./UserProfile";
 
 type ProfileProps = {
@@ -28,11 +31,20 @@ const Profile = ({ userId, showBackButton = false }: ProfileProps) => {
   const { signOut } = useAuth();
   const router = useRouter();
 
+   const { results, status, loadMore } = usePaginatedQuery(
+    api.messages.getThreads,
+    { userId: userId || userProfile?._id },
+    { initialNumItems: 10 }
+  );
+
+
   return (
     <View style={[styles.container, { paddingTop: top }]}>
       <FlatList
-        data={[]}
-        renderItem={({ item }) => <Text>test iniz</Text>}
+        data={results}
+        renderItem={({ item }) => 
+          <Thread thread={item as Doc<'messages'> & { creator: Doc<'users'>}} />
+        }
         ListEmptyComponent={
           <Text style={styles.tabContentText}>
             You haven't posted anything yet.

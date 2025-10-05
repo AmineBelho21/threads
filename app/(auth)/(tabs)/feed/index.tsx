@@ -4,9 +4,13 @@ import ThreadComposer from "@/components/ThreadComposer";
 import { Colors } from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { Doc } from '@/convex/_generated/dataModel';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useIsFocused } from "@react-navigation/native";
 import { usePaginatedQuery } from "convex/react";
+import { useNavigation } from "expo-router";
 import { useState } from "react";
-import { FlatList, Image, RefreshControl, StyleSheet, View } from "react-native";
+import { Image, RefreshControl, StyleSheet, View } from "react-native";
+import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Page = () => {
@@ -21,6 +25,32 @@ const Page = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { top } = useSafeAreaInsets();
 
+  //animation
+  const navigation = useNavigation();
+  const scrollOffset = useSharedValue(0);
+  const tabBarHeight = useBottomTabBarHeight();
+ const isFocused = useIsFocused();
+
+ const updateTabBar = () => {
+     let newMarginBottom = 0;
+    if (scrollOffset.value >= 0 && scrollOffset.value <= tabBarHeight) {
+      newMarginBottom = -scrollOffset.value;
+    } else if (scrollOffset.value > tabBarHeight) {
+      newMarginBottom = -tabBarHeight;
+    }
+
+        navigation.getParent()?.setOptions({ tabBarStyle: { marginBottom: newMarginBottom } });
+ }
+
+ const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+        if(isFocused) {
+            scrollOffset.value = event.contentOffset.y;
+            runOnJS(updateTabBar)();
+        }
+    }
+ })
+
   const onLoadMore = () => {
     loadMore(5);
   };
@@ -32,7 +62,8 @@ const Page = () => {
     }, 2000);
   };
   return (
-    <FlatList
+    <Animated.FlatList
+    onScroll={scrollHandler}
       data={results}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => <Thread thread={item as Doc<'messages'> & { creator: Doc<'users'>}} />}
