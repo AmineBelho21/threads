@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 
 const Layout = () => {
   const router = useRouter();
@@ -26,15 +26,19 @@ const Layout = () => {
           ),
         }}
       />
+      
       <Stack.Screen
-        name="(modal)/edit-profile"
+        name="(modal)/image/[url]"
         options={{
-          presentation: "modal",
-          title: "Edit profile",
+          presentation: "fullScreenModal",
+          title: "",
+          headerStyle: {
+            backgroundColor: "black",
+          },
           headerTitleAlign: "center",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.dismiss()}>
-              <Text>Cancel</Text>
+              <Ionicons name="close" size={24} color="white" />
             </TouchableOpacity>
           ),
         }}

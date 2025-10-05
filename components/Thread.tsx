@@ -3,6 +3,7 @@ import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useMutation } from 'convex/react';
+import { Link } from 'expo-router';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -43,7 +44,11 @@ const Thread = ({ thread }: ThreadProps) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.mediaContainer}>
             {mediaFiles.map((imageUrl, index) => (
-                  <Image key={index} source={{ uri: imageUrl }} style={styles.mediaImage} />
+                <Link href={`/(modal)/image/${encodeURIComponent(imageUrl)}` as any} key={index} asChild>
+                    <TouchableOpacity>
+                  <Image  source={{ uri: imageUrl }} style={styles.mediaImage} />
+                  </TouchableOpacity>
+                </Link>
             ))}
           </ScrollView>
         )}
