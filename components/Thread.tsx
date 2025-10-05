@@ -1,18 +1,32 @@
-import { Colors } from '@/constants/Colors';
-import { api } from '@/convex/_generated/api';
-import { Doc } from '@/convex/_generated/dataModel';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import { useMutation } from 'convex/react';
-import { Link } from 'expo-router';
-import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors } from "@/constants/Colors";
+import { api } from "@/convex/_generated/api";
+import { Doc } from "@/convex/_generated/dataModel";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
+import { Link } from "expo-router";
+import React from "react";
+import {
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 type ThreadProps = {
-  thread: Doc<'messages'> & { creator: Doc<'users'> };
+  thread: Doc<"messages"> & { creator: Doc<"users"> };
 };
 
 const Thread = ({ thread }: ThreadProps) => {
-  const { content, mediaFiles, likeCount, commentCount, retweetCount, creator } = thread;
+  const {
+    content,
+    mediaFiles,
+    likeCount,
+    commentCount,
+    retweetCount,
+    creator,
+  } = thread;
   const likeThread = useMutation(api.messages.likeThread);
 
   return (
@@ -21,11 +35,11 @@ const Thread = ({ thread }: ThreadProps) => {
       <View style={{ flex: 1 }}>
         <View style={styles.header}>
           <View style={styles.headerText}>
-            {/* <Link href={`/feed/profile/${creator?._id}`} as Href> */}
-              <Text style={styles.username}>
-                {creator?.first_name} {creator?.last_name}
-              </Text>
-            {/* </Link> */}
+            <Link href={`/(auth)/(tabs)/feed/profile/${creator?._id}`} asChild>
+            <Text style={styles.username}>
+              {creator?.first_name} {creator?.last_name}
+            </Text>
+            </Link>
             <Text style={styles.timestamp}>
               {new Date(thread._creationTime).toLocaleDateString()}
             </Text>
@@ -34,7 +48,7 @@ const Thread = ({ thread }: ThreadProps) => {
             name="ellipsis-horizontal"
             size={24}
             color={Colors.border}
-            style={{ alignSelf: 'flex-end' }}
+            style={{ alignSelf: "flex-end" }}
           />
         </View>
         <Text style={styles.content}>{content}</Text>
@@ -42,13 +56,18 @@ const Thread = ({ thread }: ThreadProps) => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.mediaContainer}>
+            contentContainerStyle={styles.mediaContainer}
+          >
             {mediaFiles.map((imageUrl, index) => (
-                <Link href={`/(modal)/image/${encodeURIComponent(imageUrl)}` as any} key={index} asChild>
-                    <TouchableOpacity>
-                  <Image  source={{ uri: imageUrl }} style={styles.mediaImage} />
-                  </TouchableOpacity>
-                </Link>
+              <Link
+                href={`/(modal)/image/${encodeURIComponent(imageUrl)}` as any}
+                key={index}
+                asChild
+              >
+                <TouchableOpacity>
+                  <Image source={{ uri: imageUrl }} style={styles.mediaImage} />
+                </TouchableOpacity>
+              </Link>
             ))}
           </ScrollView>
         )}
@@ -56,7 +75,7 @@ const Thread = ({ thread }: ThreadProps) => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => likeThread({ messageId: thread._id })}
-            >
+          >
             <Ionicons name="heart-outline" size={24} color="black" />
             <Text style={styles.actionText}>{likeCount}</Text>
           </TouchableOpacity>
@@ -82,12 +101,12 @@ export default Thread;
 const styles = StyleSheet.create({
   container: {
     padding: 10,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
 
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
   avatar: {
@@ -98,16 +117,16 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   username: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
   },
   timestamp: {
-    color: '#777',
+    color: "#777",
     fontSize: 12,
   },
   content: {
@@ -121,18 +140,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   mediaContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 14,
     paddingRight: 40,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
     gap: 16,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   actionText: {
     marginLeft: 5,

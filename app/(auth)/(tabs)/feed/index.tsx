@@ -3,14 +3,24 @@ import Thread from "@/components/Thread";
 import ThreadComposer from "@/components/ThreadComposer";
 import { Colors } from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
-import { Doc } from '@/convex/_generated/dataModel';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { Doc } from "@/convex/_generated/dataModel";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused } from "@react-navigation/native";
 import { usePaginatedQuery } from "convex/react";
-import { useNavigation } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { useState } from "react";
-import { Image, RefreshControl, StyleSheet, View } from "react-native";
-import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import {
+  Image,
+  RefreshControl,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, {
+  runOnJS,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Page = () => {
@@ -29,27 +39,29 @@ const Page = () => {
   const navigation = useNavigation();
   const scrollOffset = useSharedValue(0);
   const tabBarHeight = useBottomTabBarHeight();
- const isFocused = useIsFocused();
+  const isFocused = useIsFocused();
 
- const updateTabBar = () => {
-     let newMarginBottom = 0;
+  const updateTabBar = () => {
+    let newMarginBottom = 0;
     if (scrollOffset.value >= 0 && scrollOffset.value <= tabBarHeight) {
       newMarginBottom = -scrollOffset.value;
     } else if (scrollOffset.value > tabBarHeight) {
       newMarginBottom = -tabBarHeight;
     }
 
-        navigation.getParent()?.setOptions({ tabBarStyle: { marginBottom: newMarginBottom } });
- }
+    navigation
+      .getParent()
+      ?.setOptions({ tabBarStyle: { marginBottom: newMarginBottom } });
+  };
 
- const scrollHandler = useAnimatedScrollHandler({
+  const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-        if(isFocused) {
-            scrollOffset.value = event.contentOffset.y;
-            runOnJS(updateTabBar)();
-        }
-    }
- })
+      if (isFocused) {
+        scrollOffset.value = event.contentOffset.y;
+        runOnJS(updateTabBar)();
+      }
+    },
+  });
 
   const onLoadMore = () => {
     loadMore(5);
@@ -63,10 +75,18 @@ const Page = () => {
   };
   return (
     <Animated.FlatList
-    onScroll={scrollHandler}
+      onScroll={scrollHandler}
       data={results}
       showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => <Thread thread={item as Doc<'messages'> & { creator: Doc<'users'>}} />}
+      renderItem={({ item }) => (
+        <Link href={`/(auth)/(tabs)/feed/${item._id}`} asChild>
+          <TouchableOpacity>
+            <Thread
+              thread={item as Doc<"messages"> & { creator: Doc<"users"> }}
+            />
+          </TouchableOpacity>
+        </Link>
+      )}
       keyExtractor={(item) => item._id}
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.5}
@@ -84,11 +104,10 @@ const Page = () => {
       contentContainerStyle={{ paddingVertical: top }}
       ListHeaderComponent={
         <View style={{ paddingBottom: 40 }}>
-            <Image
-                source={require('@/assets/images/threads-logo-black.png')}
-                style={{ width: 40, height: 40, alignSelf: 'center'  }}
-            
-            />
+          <Image
+            source={require("@/assets/images/threads-logo-black.png")}
+            style={{ width: 40, height: 40, alignSelf: "center" }}
+          />
           <ThreadComposer isPreview />
         </View>
       }

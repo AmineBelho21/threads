@@ -7,7 +7,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { usePaginatedQuery } from "convex/react";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import {
   FlatList,
   StyleSheet,
@@ -42,9 +42,15 @@ const Profile = ({ userId, showBackButton = false }: ProfileProps) => {
     <View style={[styles.container, { paddingTop: top }]}>
       <FlatList
         data={results}
-        renderItem={({ item }) => 
-          <Thread thread={item as Doc<'messages'> & { creator: Doc<'users'>}} />
-        }
+        renderItem={({ item }) => (
+        <Link href={`/(auth)/(tabs)/feed/${item._id}`} asChild>
+          <TouchableOpacity>
+            <Thread
+              thread={item as Doc<"messages"> & { creator: Doc<"users"> }}
+            />
+          </TouchableOpacity>
+        </Link>
+      )}
         ListEmptyComponent={
           <Text style={styles.tabContentText}>
             You haven't posted anything yet.
