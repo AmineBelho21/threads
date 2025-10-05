@@ -81,7 +81,7 @@ export default Thread;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 15,
+    padding: 10,
     flexDirection: 'row',
   },
 

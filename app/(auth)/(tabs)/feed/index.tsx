@@ -3,11 +3,11 @@ import Thread from "@/components/Thread";
 import ThreadComposer from "@/components/ThreadComposer";
 import { Colors } from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
+import { Doc } from '@/convex/_generated/dataModel';
 import { usePaginatedQuery } from "convex/react";
 import { useState } from "react";
 import { FlatList, Image, RefreshControl, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 
 const Page = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -35,7 +35,7 @@ const Page = () => {
     <FlatList
       data={results}
       showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => <Thread thread={item} />}
+      renderItem={({ item }) => <Thread thread={item as Doc<'messages'> & { creator: Doc<'users'>}} />}
       keyExtractor={(item) => item._id}
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.5}
@@ -52,7 +52,7 @@ const Page = () => {
       )}
       contentContainerStyle={{ paddingVertical: top }}
       ListHeaderComponent={
-        <View style={{ paddingBottom: 16 }}>
+        <View style={{ paddingBottom: 40 }}>
             <Image
                 source={require('@/assets/images/threads-logo-black.png')}
                 style={{ width: 40, height: 40, alignSelf: 'center'  }}
