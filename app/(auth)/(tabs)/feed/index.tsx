@@ -42,12 +42,14 @@ const Page = () => {
   const isFocused = useIsFocused();
 
   const updateTabBar = () => {
+    if (!isFocused) return;
     let newMarginBottom = 0;
     if (scrollOffset.value >= 0 && scrollOffset.value <= tabBarHeight) {
       newMarginBottom = -scrollOffset.value;
     } else if (scrollOffset.value > tabBarHeight) {
       newMarginBottom = -tabBarHeight;
     }
+    
 
     navigation
       .getParent()
