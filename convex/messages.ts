@@ -1,5 +1,6 @@
-import { paginationOptsValidator } from "convex/server";
+ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { getCurrentUserOrThrow } from "./users";
@@ -27,6 +28,22 @@ export const addThreadMessage = mutation({
           await ctx.db.patch(args.threadId, {
             commentCount: (originalThread?.commentCount || 0) + 1,
           })
+
+          if(originalThread?.userId !== user._id){
+
+            const user = await ctx.db.get(originalThread?.userId as Id<'users'>);
+            const pushToken = user?.pushToken;
+
+
+            if(!pushToken) return;
+
+            await ctx.scheduler.runAfter(5000, internal.push.sendPushNotification, {
+              pushToken: pushToken,
+              messageTitle: 'New Comment',
+              messageBody: `@${user.username} commented on your thread`,
+              threadId: args.threadId,
+            })
+          }
         }
 
         return message;
