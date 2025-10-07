@@ -1,9 +1,11 @@
+import { usePush } from "@/hooks/usePush";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { Text, TouchableOpacity } from "react-native";
 
 const Layout = () => {
   const router = useRouter();
+  usePush();
 
   return (
     <Stack

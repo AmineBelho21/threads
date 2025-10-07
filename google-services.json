@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "547304734823",
+    "project_id": "threads-video",
+    "storage_bucket": "threads-video.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547304734823:android:b76ac03c91989cb05514c2",
+        "android_client_info": {
+          "package_name": "com.mycompany.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3PgxfsCAZeDeSptrfeh2CKg76Dl9TF5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
