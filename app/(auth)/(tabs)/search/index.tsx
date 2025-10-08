@@ -14,27 +14,33 @@ const Page = () => {
 
     return (
         <View style={styles.container}>
-            <Stack.Screen options={{ 
-                headerSearchBarOptions: {
-                    placeholder: 'Search',
-                    onChangeText: (event) => {
-                        setSearch(event.nativeEvent.text);
+            <Stack.Screen
+                options={{
+                    title: 'Search',
+                    headerTitle: (props) => (
+                        <View style={{ flex: 1, flexDirection: 'row' }}>
+                            <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{props.children}</Text>
+                        </View>
+                    ),
+                    headerSearchBarOptions: {
+                        placeholder: 'Search',
+                        onChangeText: (event) => setSearch(event.nativeEvent.text),
+                        tintColor: '#000',
+                        autoFocus: true,
+                        hideWhenScrolling: false,
+                        onCancelButtonPress: () => { },
                     },
-                    tintColor: 'black',
-                    autoFocus: true,
-                    hideWhenScrolling: false,
-                },
-
-                }} />
-                      <FlatList
-        data={userList}
-        contentInsetAdjustmentBehavior="automatic"
-        ItemSeparatorComponent={() => (
-          <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: Colors.border }} />
-        )}
-        ListEmptyComponent={() => <Text style={styles.emptyText}>No users found</Text>}
-        renderItem={({ item }) => <ProfileSearchResult key={item._id} user={item} />}
-      />
+                }}
+            />
+            <FlatList
+                data={userList}
+                contentInsetAdjustmentBehavior="automatic"
+                ItemSeparatorComponent={() => (
+                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: Colors.border }} />
+                )}
+                ListEmptyComponent={() => <Text style={styles.emptyText}>No users found</Text>}
+                renderItem={({ item }) => <ProfileSearchResult key={item._id} user={item} />}
+            />
         </View>)
 }
 
@@ -42,19 +48,19 @@ export default Page;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
+        flex: 1,
     },
     title: {
-      fontSize: 24,
-      fontWeight: 'bold',
+        fontSize: 24,
+        fontWeight: 'bold',
     },
     user: {
-      fontSize: 16,
-      fontWeight: 'bold',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     emptyText: {
-      fontSize: 16,
-      textAlign: 'center',
-      marginTop: 16,
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 16,
     },
-  });
+});

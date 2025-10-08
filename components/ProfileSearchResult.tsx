@@ -1,7 +1,8 @@
 import { Colors } from "@/constants/Colors";
 import { Doc } from "@/convex/_generated/dataModel";
 
-import { StyleSheet, Text, View } from "react-native";
+import { Link } from "expo-router";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type ProfileSearchResultProps = {
     user: Doc<'users'>;
@@ -9,8 +10,20 @@ type ProfileSearchResultProps = {
 
 const ProfileSearchResult = ({ user }: ProfileSearchResultProps) => {
     return (
-        <View>
-            <Text>{user.username}</Text>
+        <View style={styles.container}>
+        <Link href={`/(auth)/(tabs)/search/profile/${user._id}`} asChild>
+        <TouchableOpacity>
+            <Image source={{ uri: user.imageUrl }} style={styles.image} />
+            <View style={styles.infoContainer}>
+                <Text style={styles.name}>{user.first_name} {user.last_name}</Text>
+                <Text style={styles.username}>@{user.username}</Text>
+                <Text style={styles.followers}>{user.followersCount} followers</Text>
+            </View>
+            </TouchableOpacity>
+            </Link>
+            <TouchableOpacity style={styles.followButton}>
+                <Text style={styles.followButtonText}>Follow</Text>
+            </TouchableOpacity>
         </View>
     )
 }
