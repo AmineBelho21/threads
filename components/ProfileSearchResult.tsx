@@ -11,7 +11,7 @@ type ProfileSearchResultProps = {
 const ProfileSearchResult = ({ user }: ProfileSearchResultProps) => {
     return (
         <View style={styles.container}>
-        <Link href={`/(auth)/(tabs)/search/profile/${user._id}`} asChild>
+        <Link href={`/(auth)/(tabs)/search/profile/${user._id}`} asChild style={styles.link}>
         <TouchableOpacity>
             <Image source={{ uri: user.imageUrl }} style={styles.image} />
             <View style={styles.infoContainer}>
@@ -32,6 +32,12 @@ export default ProfileSearchResult;
 const styles = StyleSheet.create({
     container: {
       padding: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    link: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
